@@ -70,9 +70,27 @@ export type ExpressCharge = BaseCharge & {
 export type QrCharge = BaseCharge & {
     paymentMethod:  PaymentMethod.qr;
     paymentInfo: PaymentInfoETPA;
+    qrCodeType: "SINGLE" | "MULTIPLE",
+    minAmount?: number;
+    maxTransactions?: number; // Maximum number of transactions to be used with this QR Code. >= 2
+    startDate?: string; // 2024-11-19
+    endDate?: string; // 2024-11-19
 };
 
 export type CreateChargeInput = RefCharge | ExpressCharge | QrCharge;
+export type CreateQrChargeResponse = {
+  data: {
+    id: string; // UUID da transação
+    qrCodeArr: string; // Base64 do QR Code
+    responseStatus: {
+      successful: boolean; // true se criado com sucesso
+      status: 'Requested' | 'Pending' | 'Success' | 'Failed'; // estado da criação
+      code: number; // código interno de retorno (ex: 103)
+      message: string; // descrição curta
+      source: 'GPO' | 'APPY' | 'REF' | 'UMM' | 'FTBAI'; // origem do sistema
+    };
+  };
+};
 
 export type CreateChargeResponse = {
     id: string; // UUID
@@ -106,33 +124,33 @@ export type CreateChargeResponse = {
 };
 
 export type PaymentWebHook = {
-  id: string; // UUID da transação
-  merchantTransactionId: string; // identificador único da transação (1-15 chars, alfanumérico)
-  amount: number; // valor cobrado, decimal >= 1
-  options?: Record<string, any>; // custom options do merchant
+    id: string; // UUID da transação
+    merchantTransactionId: string; // identificador único da transação (1-15 chars, alfanumérico)
+    amount: number; // valor cobrado, decimal >= 1
+    options?: Record<string, any>; // custom options do merchant
 
-  reference?: {
-    referenceNumber: string; // REF payments only, 9-15 chars
-    dueDate?: string;        // ISO 8601 date-time
-    entity?: string;         // payment entity
-  };
-
-  eletronicReceipt?: {
-    customerReceipt?: string; // base64, apenas eTPA payments
-    merchantReceipt?: string; // base64, apenas eTPA payments
-  };
-
-  responseStatus: {
-    successful: boolean; // true se operação bem-sucedida
-    status: "Requested" | "Pending" | "Success" | "Failed"; // status da transação
-    code: number;        // código único de resposta
-    message: string;     // descrição curta
-    source: "APPY" | "REF" | "UMM" | "FTBAI"; // origem da resposta
-    sourceDetails?: {
-      attempt?: number;   // número de tentativas
-      type?: string;      // tipo do retorno
-      code?: string;      // código da fonte
-      message?: string;   // mensagem da fonte
+    reference?: {
+        referenceNumber: string; // REF payments only, 9-15 chars
+        dueDate?: string;        // ISO 8601 date-time
+        entity?: string;         // payment entity
     };
-  };
+
+    eletronicReceipt?: {
+        customerReceipt?: string; // base64, apenas eTPA payments
+        merchantReceipt?: string; // base64, apenas eTPA payments
+    };
+
+    responseStatus: {
+        successful: boolean; // true se operação bem-sucedida
+        status: "Requested" | "Pending" | "Success" | "Failed"; // status da transação
+        code: number;        // código único de resposta
+        message: string;     // descrição curta
+        source: "APPY" | "REF" | "UMM" | "FTBAI"; // origem da resposta
+        sourceDetails?: {
+            attempt?: number;   // número de tentativas
+            type?: string;      // tipo do retorno
+            code?: string;      // código da fonte
+            message?: string;   // mensagem da fonte
+        };
+    };
 };

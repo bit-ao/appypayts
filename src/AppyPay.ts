@@ -1,4 +1,4 @@
-import type {AxiosInstance, CreateAxiosDefaults} from "axios"; // apenas tipos
+import type {AxiosInstance, CreateAxiosDefaults} from "axios";
 import axios from "axios";
 import type {
     AppyPayConfig,
@@ -7,13 +7,13 @@ import type {
     PaymentInfoETPA,
     PaymentInfoGPO,
     PaymentInfoREF,
-    PaymentMethodsConfig
+    PaymentMethodsConfig,
+    QrCharge
 } from "./types";
 import {PaymentMethod} from "./types";
 import {OAuthClientCredentialsProvider} from "./auth/OAuthClientCredentialsProvider";
 import {OAuthCredentials} from "./auth/OAuthCredentials";
 import {DiskTokenStorage} from "./storage/DiskTokenStorage";
-import {AppyPayError} from "./exception/AppyPayError";
 
 export class AppyPay {
     private client: AxiosInstance;
@@ -50,7 +50,77 @@ export class AppyPay {
 
         return token;
     }
-    async pay(input: CreateChargeInput): Promise<CreateChargeResponse> {
+    async charge(input: CreateChargeInput): Promise<CreateChargeResponse> {
+        if (input.paymentMethod === PaymentMethod.express || input.paymentMethod  === PaymentMethod.aexpress){
+            return this.chargeExpress(input);
+        }
+        if (input.paymentMethod === PaymentMethod.ref){
+            return this.chargeRef(input);
+        }
+        if (input.paymentMethod === PaymentMethod.qr){
+            return this.chargeQr(input);
+        }
+        throw new Error("Unsupported payment method");
+    }
+    async chargeExpress(input: CreateChargeInput): Promise<CreateChargeResponse> {
+        AppyPay.validate(input);
+        await this.auth();
+        const config = input.paymentMethod === PaymentMethod.aexpress  ? { headers: { Accept: "application/vnd.appypay.asyncapi+json" } } : undefined;
+        const response  =  await this.client.post<CreateChargeResponse>(
+            "/charges",
+            {
+                currency:"AOA",
+                amount: input.amount,
+                description: input.description,
+                merchantTransactionId: input.merchantTransactionId,
+                paymentMethod: this.getPaymentMethod(input.paymentMethod),
+                paymentInfo:this.getPaymentInfo(input.paymentMethod,input.paymentInfo),
+            },
+            config
+        );
+        return response.data as CreateChargeResponse;
+
+    }
+    async chargeQr(input: QrCharge): Promise<CreateChargeResponse> {
+        AppyPay.validate(input);
+        await this.auth();
+
+        try {
+            const response = await this.client.post<CreateChargeResponse>(
+                '/qr-codes',
+                {
+                    currency: 'AOA',
+                    amount: input.amount,
+                    description: input.description,
+                    merchantTransactionId: input.merchantTransactionId,
+                    paymentMethod: this.getPaymentMethod(input.paymentMethod),
+                    paymentInfo: this.getPaymentInfo(input.paymentMethod, input.paymentInfo),
+                    qrCodeType: input.qrCodeType,
+                    minAmount: input.minAmount,
+                    maxTransactions: input.maxTransactions,
+                    startDate: input.startDate,
+                    endDate: input.endDate,
+                }
+            )
+            return response.data as CreateChargeResponse;
+        } catch (e: any) {
+            if (e.response) {
+                console.error('Erro AppyPay (HTTP):', e.response.status)
+                console.error('Mensagem:', e.response.statusText)
+                console.error('Corpo de erro:', JSON.stringify(e.response.data, null, 2))
+            } else if (e.request) {
+                console.error(' Erro: sem resposta do servidor')
+                console.error(e.request)
+            } else {
+                console.error('Erro ao configurar pedido:', e.message)
+            }
+
+            throw e
+        }
+
+
+    }
+    async chargeRef(input: CreateChargeInput): Promise<CreateChargeResponse> {
         AppyPay.validate(input);
         await this.auth();
 
@@ -73,8 +143,6 @@ export class AppyPay {
         return response.data
 
     }
-
-
 
     private static validate(input: CreateChargeInput): void {
         const { paymentMethod, paymentInfo } = input;
@@ -125,9 +193,8 @@ export class AppyPay {
         switch (method) {
             case PaymentMethod.express:
             case PaymentMethod.aexpress:
-                return this.methods.gpo;
             case PaymentMethod.qr:
-                return this.methods.etpa;
+                return this.methods.gpo;
             case PaymentMethod.ref:
                 return this.methods.ref;
             default:

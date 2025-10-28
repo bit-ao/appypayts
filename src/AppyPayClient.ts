@@ -1,6 +1,6 @@
 import { AppyPay } from "./AppyPay";
 
-export const appypay = new AppyPay({
+export const AppyPayClient = new AppyPay({
   clientId: process.env.APPYPAY_CLIENT_ID!,
   clientSecret: process.env.APPYPAY_CLIENT_SECRET!,
   resource: process.env.APPYPAY_RESOURCE!,
