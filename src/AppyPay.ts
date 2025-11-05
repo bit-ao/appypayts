@@ -3,7 +3,7 @@ import axios from "axios";
 import type {
     AppyPayConfig,
     CreateChargeInput,
-    CreateChargeResponse,
+    CreateChargeResponse, CreateQrChargeResponse,
     PaymentInfoETPA,
     PaymentInfoGPO,
     PaymentInfoREF,
@@ -81,12 +81,12 @@ export class AppyPay {
         return response.data as CreateChargeResponse;
 
     }
-    async chargeQr(input: QrCharge): Promise<CreateChargeResponse> {
+    async chargeSingleQr(input: QrCharge): Promise<CreateQrChargeResponse> {
+        input.paymentInfo = this.getPaymentInfo(input.paymentMethod, input.paymentInfo);
         AppyPay.validate(input);
         await this.auth();
-
         try {
-            const response = await this.client.post<CreateChargeResponse>(
+            const response = await this.client.post<CreateQrChargeResponse>(
                 '/qr-codes',
                 {
                     currency: 'AOA',
@@ -94,15 +94,11 @@ export class AppyPay {
                     description: input.description,
                     merchantTransactionId: input.merchantTransactionId,
                     paymentMethod: this.getPaymentMethod(input.paymentMethod),
-                    paymentInfo: this.getPaymentInfo(input.paymentMethod, input.paymentInfo),
-                    qrCodeType: input.qrCodeType,
-                    minAmount: input.minAmount,
-                    maxTransactions: input.maxTransactions,
-                    startDate: input.startDate,
-                    endDate: input.endDate,
+                    paymentInfo: input.paymentInfo,
+                    qrCodeType: "SINGLE",
                 }
             )
-            return response.data as CreateChargeResponse;
+            return response.data as CreateQrChargeResponse;
         } catch (e: any) {
             if (e.response) {
                 console.error('Erro AppyPay (HTTP):', e.response.status)
