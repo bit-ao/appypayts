@@ -86,17 +86,17 @@ export class AppyPay {
         AppyPay.validate(input);
         await this.auth();
         try {
-            const response = await this.client.post<CreateQrChargeResponse>(
-                '/qr-codes',
+            const response = await this.client.post<CreateQrChargeResponse>
+            ('/qr-codes',
                 {
-                    currency: 'AOA',
-                    amount: input.amount,
-                    description: input.description,
-                    merchantTransactionId: input.merchantTransactionId,
-                    paymentMethod: this.getPaymentMethod(input.paymentMethod),
-                    paymentInfo: input.paymentInfo,
-                    qrCodeType: "SINGLE",
-                }
+                        currency: 'AOA',
+                        amount: input.amount,
+                        description: input.description,
+                        merchantTransactionId: input.merchantTransactionId,
+                        paymentMethod: this.getPaymentMethod(input.paymentMethod),
+                        paymentInfo: input.paymentInfo,
+                        qrCodeType: "SINGLE",
+                    }
             )
             return response.data as CreateQrChargeResponse;
         } catch (e: any) {
@@ -110,11 +110,8 @@ export class AppyPay {
             } else {
                 console.error('Erro ao configurar pedido:', e.message)
             }
-
             throw e
         }
-
-
     }
     async chargeRef(input: CreateChargeInput): Promise<CreateChargeResponse> {
         AppyPay.validate(input);
