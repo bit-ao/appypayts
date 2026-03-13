@@ -1,7 +1,7 @@
 // create-charge.dto.ts
 
 
-import {ExpressCharge, PaymentMethod, QrCharge} from "../Types";
+import {ExpressCharge, PaymentMethod, QrCharge} from "../types";
 
 export class NotifyDto {
     name?: string
@@ -38,6 +38,11 @@ export class RefChargeDto extends BaseChargeDto {
     paymentInfo!: PaymentInfoRefDto
 }
 
+export class ARefChargeDto extends BaseChargeDto {
+    paymentMethod: PaymentMethod.aref = PaymentMethod.aref
+    paymentInfo!: PaymentInfoRefDto
+}
+
 export class ExpressChargeDto extends BaseChargeDto  implements ExpressCharge{
     paymentMethod!: PaymentMethod.express | PaymentMethod.aexpress
     paymentInfo!: PaymentInfoGpoDto
@@ -59,7 +64,7 @@ export class QrChargeDto implements QrCharge {
   endDate?: string
 }
 
-export type CreateChargeDto = RefChargeDto | ExpressChargeDto | QrChargeDto
+export type CreateChargeDto = RefChargeDto | ARefChargeDto | ExpressChargeDto | QrChargeDto
 
 // create-charge-response.dto.ts
 export class SourceDetailsDto {
@@ -97,6 +102,13 @@ export class CreateChargeResponseDto {
     reference?: ReferenceDto
     eletronicReceipt?: EletronicReceiptDto
 }
+
+export class RefundInputDto {
+    amount?: number
+    description!: string
+}
+
+export class RefundResponseDto extends CreateChargeResponseDto {}
 
 // payment-webhook.dto.ts
 export class PaymentWebHookDto {
