@@ -1,6 +1,7 @@
 // types.ts
 export enum PaymentMethod {
     ref = "ref",
+    aref = "aref",
     express = "express",
     aexpress = "aexpress",
     qr = "qr",
@@ -62,6 +63,11 @@ export type RefCharge = BaseCharge & {
     paymentInfo: PaymentInfoREF;
 };
 
+export type ARefCharge = BaseCharge & {
+    paymentMethod: PaymentMethod.aref;
+    paymentInfo: PaymentInfoREF;
+};
+
 export type ExpressCharge = BaseCharge & {
     paymentMethod:  PaymentMethod.express |  PaymentMethod.aexpress
     paymentInfo: PaymentInfoGPO;
@@ -77,7 +83,7 @@ export type QrCharge = BaseCharge & {
     endDate?: string; // 2024-11-19
 };
 
-export type CreateChargeInput = RefCharge | ExpressCharge | QrCharge;
+export type CreateChargeInput = RefCharge | ARefCharge | ExpressCharge | QrCharge;
 export type CreateQrChargeResponse = {
   data: {
     id: string; // UUID da transação
@@ -122,6 +128,15 @@ export type CreateChargeResponse = {
         merchantReceipt: string; // Base64
     };
 };
+
+export type GetChargeResponse = CreateChargeResponse;
+
+export type RefundInput = {
+    amount?: number;       // omitir = devolução total
+    description: string;
+};
+
+export type RefundResponse = CreateChargeResponse;
 
 export type PaymentWebHook = {
     id: string; // UUID da transação

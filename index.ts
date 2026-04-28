@@ -1,31 +1,52 @@
-import {AppyPay} from "./src/AppyPay";
-import {ExpressChargeDto, QrChargeDto} from "./src/dtos/index";
-import {PaymentMethod} from "./src/Types";
-import {AppyPayClient} from "./src/AppyPayClient";
+// Public API surface
+export { AppyPay } from "./src/AppyPay";
+export { AppyPayClient } from "./src/AppyPayClient";
 
-/*
-const dto = new QrChargeDto()
-dto.amount= 100;
-dto.currency= 'AOA';
-dto.description= 'Pagamento de inscrição';
-dto.merchantTransactionId = 'DEVQR0001'
-dto.paymentMethod= PaymentMethod.qr;
-dto.qrCodeType= 'SINGLE';
-dto.minAmount= 100;
-dto.maxTransactions= 1;
-dto.startDate= '2025-10-28';
-dto.endDate= '2025-10-28';
-dto.paymentInfo = {
-    posCode : 'TPA448822'
-}
-AppyPayClient.chargeQr(dto).then(r => console.log(r))*/
-const dto = new ExpressChargeDto()
-dto.amount= 10;
-dto.currency= 'AOA';
-dto.description= 'Pagamento de inscrição';
-dto.merchantTransactionId = 'DEVQR0001'
-dto.paymentMethod= PaymentMethod.aexpress;
-dto.paymentInfo = {
-    phoneNumber : '925924797'
-}
-AppyPayClient.chargeExpress(dto).then(r => console.log(r))
+// Enum + Types
+export { PaymentMethod } from "./src/types";
+export type {
+    AppyPayConfig,
+    PaymentMethodsConfig,
+    PaymentInfo,
+    PaymentInfoGPO,
+    PaymentInfoREF,
+    PaymentInfoETPA,
+    CreateChargeInput,
+    RefCharge,
+    ARefCharge,
+    ExpressCharge,
+    QrCharge,
+    CreateChargeResponse,
+    CreateQrChargeResponse,
+    GetChargeResponse,
+    RefundInput,
+    RefundResponse,
+    PaymentWebHook,
+} from "./src/types";
+
+// DTOs
+export {
+    NotifyDto,
+    BaseChargeDto,
+    PaymentInfoGpoDto,
+    PaymentInfoRefDto,
+    PaymentInfoEtpaDto,
+    RefChargeDto,
+    ARefChargeDto,
+    ExpressChargeDto,
+    QrChargeDto,
+    RefundInputDto,
+    RefundResponseDto,
+    CreateChargeResponseDto,
+    PaymentWebHookDto,
+} from "./src/dtos/index";
+
+// Error handling
+export { AppyPayError } from "./src/exception/AppyPayError";
+export { handleAppyPayException } from "./src/exception/handleAppyPayException";
+
+// Storage adapters
+export type { TokenStoragePort } from "./src/TokenStoragePort";
+export { DiskTokenStorage } from "./src/storage/DiskTokenStorage";
+export { MemoryTokenStorage } from "./src/storage/MemoryTokenStorage";
+export { RedisTokenStorage } from "./src/storage/RedisTokenStorage";
