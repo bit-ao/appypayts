@@ -7,6 +7,8 @@ import type {
     CreateChargeResponse,
     CreateQrChargeResponse,
     GetChargeResponse,
+    ListChargesFilter,
+    ListChargesResponse,
     PaymentInfoETPA,
     PaymentInfoGPO,
     PaymentInfoREF,
@@ -148,6 +150,22 @@ export class AppyPay {
         await this.auth();
         const response = await this.client.get<GetChargeResponse>(`/charges/${id}`);
         return response.data;
+    }
+
+    async listCharges(filter: ListChargesFilter = {}): Promise<ListChargesResponse> {
+        await this.auth();
+        const response = await this.client.get<ListChargesResponse>("/charges", { params: filter });
+        return response.data;
+    }
+
+    async analyticsCharges(filter: ListChargesFilter = {}): Promise<ListChargesResponse> {
+        await this.auth();
+        const response = await this.client.get<ListChargesResponse>("/analytics/charges", { params: filter });
+        return response.data;
+    }
+
+    async findChargeByMerchantId(merchantTransactionId: string): Promise<ListChargesResponse> {
+        return this.listCharges({ merchantTransactionId, limit: 1 });
     }
 
     async refund(chargeId: string, input: RefundInput): Promise<RefundResponse> {

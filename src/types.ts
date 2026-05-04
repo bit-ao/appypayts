@@ -131,6 +131,55 @@ export type CreateChargeResponse = {
 
 export type GetChargeResponse = CreateChargeResponse;
 
+export type ChargeStatus = "Requested" | "Pending" | "Success" | "Failed";
+
+export type ListChargesFilter = {
+    amountFrom?: number;
+    amountTo?: number;
+    currency?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    disputes?: string;
+    type?: string;
+    merchantTransactionId?: string;
+    limit?: number;
+    skip?: number;
+    culture?: "en" | "pt-BR";
+};
+
+export type ChargeListItem = {
+    id: number | string;
+    rId?: string;
+    merchantTransactionId: string;
+    type: string;
+    typeId?: number;
+    operation: string;
+    amount: number;
+    currency: string;
+    status: ChargeStatus | string;
+    description: string;
+    disputes?: boolean;
+    applicationFeeAmount: number;
+    paymentMethod: string;
+    paymentMethodId?: number;
+    merchantId?: number;
+    merchantName?: string;
+    createdDate: string;
+    updatedDate: string;
+    options?: Record<string, any> | null;
+    reference?: {
+        referenceNumber: string;
+        dueDate?: string;
+        entity?: string;
+    } | null;
+};
+
+export type ListChargesResponse = {
+    payments: ChargeListItem[];
+    totalCount: number;
+    hasMorePages: boolean;
+};
+
 export type RefundInput = {
     amount?: number;       // omitir = devolução total
     description: string;
