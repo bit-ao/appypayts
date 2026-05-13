@@ -129,8 +129,6 @@ export type CreateChargeResponse = {
     };
 };
 
-export type GetChargeResponse = CreateChargeResponse;
-
 export type RefundInput = {
     amount?: number;       // omitir = devolução total
     description: string;

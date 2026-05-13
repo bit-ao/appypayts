@@ -1,7 +1,8 @@
 // create-charge.dto.ts
 
 
-import {ExpressCharge, PaymentMethod, QrCharge} from "../types";
+import type {ExpressCharge, QrCharge} from "../types";
+import {PaymentMethod} from "../types";
 
 export class NotifyDto {
     name?: string
@@ -138,4 +139,193 @@ export class PaymentWebHookDto {
             message?: string
         }
     }
+}
+
+export class CreateQrChargeResponseDto {
+    id!: string
+    qrCodeArr!: string
+    responseStatus!: ResponseStatusDto
+}
+
+// ---------------------------------------------------------------------------
+// Payment / GetCharge (GET /charges/:id)
+// ---------------------------------------------------------------------------
+export class TransactionEventDto {
+    id!: number
+    transactionId!: string
+    type!: string
+    providerTransactionId?: string | null
+    actionStatus!: boolean
+    createdDate!: string
+    responseStatus?: ResponseStatusDto
+}
+
+export class PaymentDto {
+    id!: string
+    merchantTransactionId?: string | null
+    type?: string | null
+    operation?: string | null
+    amount!: number
+    currency?: string | null
+    status?: 'Requested' | 'Pending' | 'Success' | 'Failed' | null
+    description?: string | null
+    disputes?: boolean | null
+    applicationFeeAmount?: number | null
+    paymentMethod?: string | null
+    createdDate?: string | null
+    updatedDate?: string | null
+    options?: Record<string, any> | null
+    reference?: ReferenceDto | null
+    transactionEvents?: TransactionEventDto[] | null
+}
+
+export class GetChargeResponseDto {
+    payment?: PaymentDto | null
+}
+
+// ---------------------------------------------------------------------------
+// Listagem de cobranças (GET /charges)
+// ---------------------------------------------------------------------------
+export class ListChargesQueryDto {
+    amountFrom?: number
+    amountTo?: number
+    currency?: string
+    dateFrom?: string
+    dateTo?: string
+    disputes?: string
+    limit?: number
+    merchantTransactionId?: string
+    skip?: number
+    type?: string
+    culture?: string
+
+    toQueryParams(): Record<string, string | number> {
+        const q: Record<string, string | number> = {}
+        if (this.amountFrom            !== undefined) q.amountFrom            = this.amountFrom
+        if (this.amountTo              !== undefined) q.amountTo              = this.amountTo
+        if (this.currency              !== undefined) q.currency              = this.currency
+        if (this.dateFrom              !== undefined) q.dateFrom              = this.dateFrom
+        if (this.dateTo                !== undefined) q.dateTo                = this.dateTo
+        if (this.disputes              !== undefined) q.disputes              = this.disputes
+        if (this.limit                 !== undefined) q.limit                 = this.limit
+        if (this.merchantTransactionId !== undefined) q.merchantTransactionId = this.merchantTransactionId
+        if (this.skip                  !== undefined) q.skip                  = this.skip
+        if (this.type                  !== undefined) q.type                  = this.type
+        if (this.culture               !== undefined) q.culture               = this.culture
+        return q
+    }
+}
+
+export class ListChargesResponseDto {
+    payments!: PaymentDto[]
+}
+
+// ---------------------------------------------------------------------------
+// Registo de referências (POST /references)
+// ---------------------------------------------------------------------------
+export class RegisterReferenceAmountDto {
+    amount!: number
+    descriptionLine1?: string
+    descriptionLine2?: string
+
+    toBody(): Record<string, any> {
+        const o: Record<string, any> = { amount: this.amount }
+        if (this.descriptionLine1 !== undefined) o.descriptionLine1 = this.descriptionLine1
+        if (this.descriptionLine2 !== undefined) o.descriptionLine2 = this.descriptionLine2
+        return o
+    }
+}
+
+export class RegisterReferenceItemDto {
+    referenceNumber!: string
+    currency: string = 'AOA'
+    amounts?: RegisterReferenceAmountDto[]
+    minAmount?: number
+    maxAmount?: number
+    startDate?: string
+    expirationDate?: string
+
+    toBody(): Record<string, any> {
+        const o: Record<string, any> = {
+            referenceNumber: this.referenceNumber,
+            currency: this.currency,
+        }
+        if (this.amounts        !== undefined) o.amounts        = this.amounts.map(a => a.toBody())
+        if (this.minAmount      !== undefined) o.minAmount      = this.minAmount
+        if (this.maxAmount      !== undefined) o.maxAmount      = this.maxAmount
+        if (this.startDate      !== undefined) o.startDate      = this.startDate
+        if (this.expirationDate !== undefined) o.expirationDate = this.expirationDate
+        return o
+    }
+}
+
+export class RegisterReferenceDto {
+    paymentMethod: string = ''
+    references!: RegisterReferenceItemDto[]
+    createdBy?: string
+
+    toBody(): Record<string, any> {
+        const o: Record<string, any> = {
+            paymentMethod: this.paymentMethod,
+            references: this.references.map(r => r.toBody()),
+        }
+        if (this.createdBy !== undefined) o.createdBy = this.createdBy
+        return o
+    }
+}
+
+export class RegisterReferenceResultDto {
+    referenceNumber!: string
+    code!: number
+    message!: string
+}
+
+export class RegisterReferenceResponseDto {
+    references!: RegisterReferenceResultDto[]
+}
+
+// ---------------------------------------------------------------------------
+// Listagem de referências (GET /references)
+// ---------------------------------------------------------------------------
+export class ListReferencesQueryDto {
+    amountFrom?: number
+    amountTo?: number
+    dateFrom?: string
+    dateTo?: string
+    limit?: number
+    skip?: number
+    culture?: string
+
+    toQueryParams(): Record<string, string | number> {
+        const q: Record<string, string | number> = {}
+        if (this.amountFrom !== undefined) q.amountFrom = this.amountFrom
+        if (this.amountTo   !== undefined) q.amountTo   = this.amountTo
+        if (this.dateFrom   !== undefined) q.dateFrom   = this.dateFrom
+        if (this.dateTo     !== undefined) q.dateTo     = this.dateTo
+        if (this.limit      !== undefined) q.limit      = this.limit
+        if (this.skip       !== undefined) q.skip       = this.skip
+        if (this.culture    !== undefined) q.culture    = this.culture
+        return q
+    }
+}
+
+export class ListedReferenceDto {
+    id!: number
+    entity!: string
+    referenceNumber!: string
+    currency: string = 'AOA'
+    amount?: number | null
+    minAmount?: number | null
+    maxAmount?: number | null
+    startDate!: string
+    expirationDate!: string
+    isActive!: boolean
+    createdBy!: string
+    updatedBy!: string
+    createdDate!: string
+    updatedDate!: string
+}
+
+export class ListReferencesResponseDto {
+    references!: ListedReferenceDto[]
 }
